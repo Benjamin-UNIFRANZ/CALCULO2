@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Calculadora de Integrales 3x3{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Calculadora de Integrales 3x3</h1>
+<form id="integralForm" method="POST" action="/calculate">
+    <div class="form-group">
+        <label for="func">Función a integrar:</label>
+        <input type="text" class="form-control" id="func" name="func" value="x*y" required>
+    </div>
+    <div class="form-group">
+        <label for="integral">Integral:</label>
+        <div class="d-flex align-items-center">
+            <div class="text-center">
+                <input type="text" class="form-control mb-2" id="x_upper" name="x_upper" value="3" required>
+                <span style="font-size: 2em;">∫</span>
+                <input type="text" class="form-control mt-2" id="x_lower" name="x_lower" value="2" required>
+            </div>
+            <div class="text-center mx-3">
+                <input type="text" class="form-control mb-2" id="y_upper" name="y_upper" value="2*x" required>
+                <span style="font-size: 2em;">∫</span>
+                <input type="text" class="form-control mt-2" id="y_lower" name="y_lower" value="0" required>
+            </div>
+            <div class="text-center">
+                <input type="text" class="form-control mb-2" id="z_upper" name="z_upper" value="x^2+y^2+2" required>
+                <span style="font-size: 2em;">∫</span>
+                <input type="text" class="form-control mt-2" id="z_lower" name="z_lower" value="1" required>
+            </div>
+            <input type="text" class="form-control ml-3" id="differentials" name="differentials" value="dzdydx" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Calcular Integral</button>
+</form>
+<div class="mt-4">
+    <h2>Resultado:</h2>
+    <p id="result">{{ result }}</p>
+    <h3>Procedimiento:</h3>
+    <div id="solution-steps-target" class="">
+        <div id="steps-container">
+            <section id="multipleSolutions">
+                <div class="solution_div">
+                    <div class="solution_box solution_outside_box">
+                        <div data-index="0" class="solution_title_container_highest"></div>
+                        <div class="ul-div">
+                            <div class="solution_step_list">
+                                {% for step in steps %}
+                                    <div class="solution_step_title">
+                                        <span class="mathquill-embedded-latex mathquill-rendered-math">
+                                            <span class="selectable"></span>\({{ step }}\)
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<footer class="card-footer bg-dark text-white py-2 fixed-bottom">
+    <div class="row align-items-center justify-content-center">
+        <div class="col-md-6 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                <path d="M13.468 12.37C12.758 11.226 11.383 10.5 8 10.5s-4.758.726-5.468 1.87A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63zM8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
+            </svg>
+            <div>Benjamin Rodriguez Ortiz</div>
+        </div>
+        <div class="col-md-6 text-center">
+            <div class="mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383l-4.803 2.882L15 11.383V5.383zM1 5.383v6l4.803-2.882L1 5.383zM14.803 12H1.197l4.803-2.882L14.803 12z"/>
+                </svg>
+            </div>
+            <div>benjamin12062006@gmail.com</div>
+        </div>
+    </div>
+</footer>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Calculadora de Integrales 2x2{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Calculadora de Integrales 2x2</h1>
+<form id="integralForm" method="POST" action="/integrales_2x2/calculate">
+    <div class="form-group">
+        <label for="func">Función a integrar:</label>
+        <input type="text" class="form-control" id="func" name="func" value="(6*x^2)*y-2*x" required>
+    </div>
+    <div class="form-group">
+        <label for="integral">Integral:</label>
+        <div class="d-flex align-items-center">
+            <div class="text-center">
+                <input type="text" class="form-control mb-2" id="x_upper" name="x_upper" value="4" required>
+                <span style="font-size: 2em;">∫</span>
+                <input type="text" class="form-control mt-2" id="x_lower" name="x_lower" value="1" required>
+            </div>
+            <div class="text-center mx-3">
+                <input type="text" class="form-control mb-2" id="y_upper" name="y_upper" value="2" required>
+                <span style="font-size: 2em;">∫</span>
+                <input type="text" class="form-control mt-2" id="y_lower" name="y_lower" value="0" required>
+            </div>
+            <input type="text" class="form-control ml-3" id="differentials" name="differentials" value="dydx" required>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Calcular Integral</button>
+</form>
+<div class="mt-4">
+    <h2>Resultado:</h2>
+    <p id="result">{{ result }}</p>
+    <h3>Procedimiento:</h3>
+    <div id="solution-steps-target" class="">
+        <div id="steps-container">
+            <section id="multipleSolutions">
+                <div class="solution_div">
+                    <div class="solution_box solution_outside_box">
+                        <div data-index="0" class="solution_title_container_highest"></div>
+                        <div class="ul-div">
+                            <div class="solution_step_list">
+                                {% for step in steps %}
+                                    <div class="solution_step_title">
+                                        <span class="mathquill-embedded-latex mathquill-rendered-math">
+                                            <span class="selectable"></span>\({{ step }}\)
+                                        </span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

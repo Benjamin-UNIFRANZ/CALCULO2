@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+
+{% block title %}Documentación{% endblock %}
+
+{% block content %}
+<h1 class="text-center text-primary">Documentación</h1>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h2>Derivadas Parciales</h2>
+    </div>
+    <div class="card-body">
+        <p>El código para calcular derivadas parciales se encuentra en el archivo <code>derivadas_parciales.py</code>. A
+            continuación se presenta una explicación detallada de su funcionalidad:</p>
+        <pre class="bg-light p-3">
+<code>
+from flask import Blueprint, request, render_template
+import sympy as sp
+
+derivadas_parciales_bp = Blueprint('derivadas_parciales', __name__)
+
+@derivadas_parciales_bp.route('/')
+def derivadas_parciales():
+    return render_template('derivadas_parciales.html')
+
+@derivadas_parciales_bp.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        # Recibir los valores del formulario
+        func_str = request.form['func']
+        variable_str = request.form['variable']
+
+        # Definir las variables simbólicas
+        variables = sp.symbols(variable_str)
+
+        # Convertir la función de cadena a expresión simbólica
+        func = sp.sympify(func_str)
+
+        # Calcular la derivada parcial
+        derivative = sp.diff(func, variables)
+
+        return render_template('derivadas_parciales.html', result=f'Resultado de la derivada: {derivative}')
+    except ValueError as e:
+        return render_template('derivadas_parciales.html', result=f"Error en la entrada: {e}")
+    except Exception as e:
+        return render_template('derivadas_parciales.html', result=f"Error al calcular la derivada: {e}")
+</code>
+        </pre>
+        <p>Este código define un Blueprint de Flask para manejar las rutas relacionadas con las derivadas parciales. La
+            función <code>calculate</code> recibe los valores del formulario, convierte la función de cadena a una
+            expresión simbólica utilizando SymPy, y calcula la derivada parcial respecto a la variable especificada. El
+            resultado se muestra en la plantilla <code>derivadas_parciales.html</code>.</p>
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#infoModal1">
+            Más Información
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="infoModal1" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModalLabel">Más Información</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h1>Explicación del Código</h1>
+                        <p>El código proporcionado es un módulo de Flask que maneja el cálculo de derivadas parciales
+                            utilizando SymPy. A continuación, se explica cada sección del código:</p>
+
+                        <h2>Importaciones</h2>
+                        <pre>
+                            <code>
+        from flask import Blueprint, request, render_template
+        import sympy as sp
+                            </code>
+                        </pre>
+                        <ul>
+                            <li><code>Blueprint</code>: Permite organizar el código de la aplicación Flask en
+                                componentes reutilizables.</li>
+                            <li><code>request</code>: Permite acceder a los datos enviados en una solicitud HTTP.</li>
+                            <li><code>render_template</code>: Renderiza plantillas HTML.</li>
+                            <li><code>sympy</code>: Biblioteca para realizar cálculos simbólicos en Python.</li>
+                        </ul>
+
+                        <h2>Definición del Blueprint</h2>
+                        <pre>
+                            <code>
+        derivadas_parciales_bp = Blueprint('derivadas_parciales', __name__)
+                            </code>
+                        </pre>
+                        <p>Se crea un <code>Blueprint</code> llamado <code>derivadas_parciales</code> para manejar las
+                            rutas relacionadas con las derivadas parciales.</p>
+
+                        <h2>Ruta Principal</h2>
+                        <pre>
+                            <code>
+        @derivadas_parciales_bp.route('/')
+        def derivadas_parciales():
+            return render_template('derivadas_parciales.html')
+                            </code>
+                        </pre>
+                        <p>Define la ruta principal (<code>/</code>) que renderiza la plantilla
+                            <code>derivadas_parciales.html</code>.
+                        </p>
+
+                        <h2>Ruta para Calcular Derivadas Parciales</h2>
+                        <pre>
+                            <code>
+        @derivadas_parciales_bp.route('/calculate', methods=['POST'])
+        def calculate():
+            try:
+                # Recibir los valores del formulario
+                func_str = request.form['func']
+                variable_str = request.form['variable']
+                            </code>
+                        </pre>
+                        <p>Define la ruta <code>/calculate</code> que acepta solicitudes POST. Recibe los valores del
+                            formulario: <code>func</code> (la función a derivar) y <code>variable</code> (la variable
+                            respecto a la cual se derivará).</p>
+
+                        <pre>
+                            <code>
+                # Definir las variables simbólicas
+                variables = sp.symbols(variable_str)
+                            </code>
+                        </pre>
+                        <p>Define las variables simbólicas utilizando SymPy.</p>
+
+                        <pre>
+                            <code>
+                # Convertir la función de cadena a expresión simbólica
+                func = sp.sympify(func_str)
+                            </code>
+                        </pre>
+                        <p>Convierte la función de cadena a una expresión simbólica.</p>
+
+                        <pre>
+                            <code>
+                # Calcular la derivada parcial
+                derivative = sp.diff(func, variables)
+                            </code>
+                        </pre>
+                        <p>Calcula la derivada parcial de la función respecto a la variable especificada.</p>
+
+                        <pre>
+                            <code>
+                return render_template('derivadas_parciales.html', result=f'Resultado de la derivada: {derivative}')
+                            </code>
+                        </pre>
+                        <p>Renderiza la plantilla <code>derivadas_parciales.html</code> con el resultado de la derivada.
+                        </p>
+
+                        <h2>Manejo de Excepciones</h2>
+                        <pre>
+                            <code>
+            except ValueError as e:
+                return render_template('derivadas_parciales.html', result=f"Error en la entrada: {e}")
+            except Exception as e:
+                return render_template('derivadas_parciales.html', result=f"Error al calcular la derivada: {e}")
+                            </code>
+                        </pre>
+                        <p>Captura y maneja posibles errores:</p>
+                        <ul>
+                            <li><code>ValueError</code>: Error en la entrada del formulario.</li>
+                            <li><code>Exception</code>: Cualquier otro error durante el cálculo de la derivada.</li>
+                        </ul>
+
+                        <h2>Resumen</h2>
+                        <p>El código define un módulo de Flask que permite calcular derivadas parciales de funciones
+                            simbólicas. Recibe la función y la variable desde un formulario, realiza el cálculo
+                            utilizando SymPy y muestra el resultado en una plantilla HTML.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-success text-white">
+        <h2>Integrales Dobles</h2>
+    </div>
+    <div class="card-body">
+        <p>El código para calcular integrales dobles se encuentra en el archivo <code>integrales_2x2.py</code>. A
+            continuación se presenta una explicación detallada de su funcionalidad:</p>
+        <pre class="bg-light p-3">
+<code>
+from flask import Blueprint, request, render_template
+import sympy as sp
+
+integrales_2x2_bp = Blueprint('integrales_2x2', __name__)
+
+@integrales_2x2_bp.route('/')
+def integrales_2x2():
+    return render_template('integrales_2x2.html')
+
+@integrales_2x2_bp.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        # Recibir los valores del formulario
+        func_str = request.form['func']
+        x_lower = request.form['x_lower']
+        x_upper = request.form['x_upper']
+        y_lower = request.form['y_lower']
+        y_upper = request.form['y_upper']
+
+        # Definir las variables simbólicas
+        x, y = sp.symbols('x y')
+
+        # Convertir la función de cadena a expresión simbólica
+        func = sp.sympify(func_str, locals={'x': x, 'y': y})
+
+        # Convertir los límites de integración a expresiones simbólicas
+        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y})
+        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y})
+        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y})
+        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y})
+
+        # Realizar la integración doble paso a paso
+        integral_y = sp.integrate(func, (y, y_lower, y_upper))
+        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+
+        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {integral_x}')
+    except ValueError as e:
+        return render_template('integrales_2x2.html', result=f"Error en la entrada: {e}")
+    except Exception as e:
+        return render_template('integrales_2x2.html', result=f"Error al calcular la integral: {e}")
+</code>
+        </pre>
+        <p>Este código define un Blueprint de Flask para manejar las rutas relacionadas con las integrales dobles. La
+            función <code>calculate</code> recibe los valores del formulario, convierte la función de cadena a una
+            expresión simbólica utilizando SymPy, y calcula la integral doble respecto a las variables especificadas. El
+            resultado se muestra en la plantilla <code>integrales_2x2.html</code>.</p>
+        <!-- Botón para abrir el modal -->
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#infoModal2">
+            Más Información
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="infoModal2" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModalLabel">Más Información</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h2>Explicación del Código</h2>
+                        <p>El código proporcionado es un módulo de Flask que maneja el cálculo de integrales dobles
+                            utilizando SymPy. A continuación, se explica cada sección del código:</p>
+
+                        <h3>Importaciones</h3>
+                        <pre>
+                            <code>
+    from flask import Blueprint, request, render_template
+    import sympy as sp
+                            </code>
+                        </pre>
+                        <ul>
+                            <li><code>Blueprint</code>: Permite organizar el código de la aplicación Flask en
+                                componentes reutilizables.</li>
+                            <li><code>request</code>: Permite acceder a los datos enviados en una solicitud HTTP.</li>
+                            <li><code>render_template</code>: Renderiza plantillas HTML.</li>
+                            <li><code>sympy</code>: Biblioteca para realizar cálculos simbólicos en Python.</li>
+                        </ul>
+
+                        <h3>Definición del Blueprint</h3>
+                        <pre>
+                            <code>
+    integrales_2x2_bp = Blueprint('integrales_2x2', __name__)
+                            </code>
+                        </pre>
+                        <p>Se crea un <code>Blueprint</code> llamado <code>integrales_2x2</code> para manejar las rutas
+                            relacionadas con las integrales dobles.</p>
+
+                        <h3>Ruta Principal</h3>
+                        <pre>
+                            <code>
+    @integrales_2x2_bp.route('/')
+    def integrales_2x2():
+    return render_template('integrales_2x2.html')
+                            </code>
+                        </pre>
+                        <p>Define la ruta principal (<code>/</code>) que renderiza la plantilla
+                            <code>integrales_2x2.html</code>.
+                        </p>
+
+                        <h3>Ruta para Calcular Integrales Dobles</h3>
+                        <pre>
+                            <code>
+    @integrales_2x2_bp.route('/calculate', methods=['POST'])
+    def calculate():
+    try:
+        # Recibir los valores del formulario
+        func_str = request.form['func']
+        x_lower = request.form['x_lower']
+        x_upper = request.form['x_upper']
+        y_lower = request.form['y_lower']
+        y_upper = request.form['y_upper']
+                            </code>
+                        </pre>
+                        <p>Define la ruta <code>/calculate</code> que acepta solicitudes POST. Recibe los valores del
+                            formulario: <code>func</code> (la función a integrar) y los límites de integración
+                            <code>x_lower</code>, <code>x_upper</code>, <code>y_lower</code>, <code>y_upper</code>.
+                        </p>
+
+                        <pre>
+                            <code>
+        # Definir las variables simbólicas
+        x, y = sp.symbols('x y')
+                            </code>
+                        </pre>
+                        <p>Define las variables simbólicas utilizando SymPy.</p>
+
+                        <pre>
+                            <code>
+        # Convertir la función de cadena a expresión simbólica
+        func = sp.sympify(func_str, locals={'x': x, 'y': y})
+                            </code>
+                        </pre>
+                        <p>Convierte la función de cadena a una expresión simbólica.</p>
+
+                        <pre>
+                            <code>
+        # Convertir los límites de integración a expresiones simbólicas
+        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y})
+        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y})
+        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y})
+        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y})
+                            </code>
+                        </pre>
+                        <p>Convierte los límites de integración a expresiones simbólicas.</p>
+
+                        <pre>
+                            <code>
+        # Realizar la integración doble paso a paso
+        integral_y = sp.integrate(func, (y, y_lower, y_upper))
+        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+                            </code>
+                        </pre>
+                        <p>Realiza la integración doble paso a paso: primero respecto a <code>y</code> y luego respecto
+                            a <code>x</code>.</p>
+
+                        <pre>
+                            <code>
+        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {integral_x}')
+                            </code>
+                        </pre>
+                        <p>Renderiza la plantilla <code>integrales_2x2.html</code> con el resultado de la integral.</p>
+
+                        <h3>Manejo de Excepciones</h3>
+                        <pre>
+                            <code>
+    except ValueError as e:
+        return render_template('integrales_2x2.html', result=f"Error en la entrada: {e}")
+    except Exception as e:
+        return render_template('integrales_2x2.html', result=f"Error al calcular la integral: {e}")
+                            </code>
+                        </pre>
+                        <p>Captura y maneja posibles errores:</p>
+                        <ul>
+                            <li><code>ValueError</code>: Error en la entrada del formulario.</li>
+                            <li><code>Exception</code>: Cualquier otro error durante el cálculo de la integral.</li>
+                        </ul>
+
+                        <h3>Resumen</h3>
+                        <p>El código define un módulo de Flask que permite calcular integrales dobles de funciones
+                            simbólicas. Recibe la función y los límites de integración desde un formulario, realiza el
+                            cálculo utilizando SymPy y muestra el resultado en una plantilla HTML.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-warning text-white">
+        <h2>Integrales Triples</h2>
+    </div>
+    <div class="card-body">
+        <p>El código para calcular integrales triples se encuentra en el archivo <code>integrales_3x3.py</code>. A
+            continuación se presenta una explicación detallada de su funcionalidad:</p>
+        <pre class="bg-light p-3">
+<code>
+from flask import Blueprint, request, render_template
+import sympy as sp
+
+integrales_3x3_bp = Blueprint('integrales_3x3', __name__)
+
+@integrales_3x3_bp.route('/')
+def index():
+    return render_template('index.html')
+
+@integrales_3x3_bp.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        # Recibir los valores del formulario
+        func_str = request.form['func']
+        x_lower = request.form['x_lower']
+        x_upper = request.form['x_upper']
+        y_lower = request.form['y_lower']
+        y_upper = request.form['y_upper']
+        z_lower = request.form['z_lower']
+        z_upper = request.form['z_upper']
+
+        # Definir las variables simbólicas
+        x, y, z = sp.symbols('x y z')
+
+        # Convertir la función de cadena a expresión simbólica
+        func = sp.sympify(func_str, locals={'x': x, 'y': y, 'z': z})
+
+        # Convertir los límites de integración a expresiones simbólicas
+        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z})
+        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})
+        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z})
+        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})
+        z_lower = sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z})
+        z_upper = sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z})
+
+        # Realizar la integración triple paso a paso
+        integral_z = sp.integrate(func, (z, z_lower, z_upper))
+        integral_y = sp.integrate(integral_z, (y, y_lower, y_upper))
+        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+
+        return render_template('index.html', result=f'Resultado de la integral: {integral_x}')
+    except ValueError as e:
+        return render_template('index.html', result=f"Error en la entrada: {e}")
+    except Exception as e:
+        return render_template('index.html', result=f"Error al calcular la integral: {e}")
+</code>
+        </pre>
+        <p>Este código define un Blueprint de Flask para manejar las rutas relacionadas con las integrales triples. La
+            función <code>calculate</code> recibe los valores del formulario, convierte la función de cadena a una
+            expresión simbólica utilizando SymPy, y calcula la integral triple respecto a las variables especificadas.
+            El resultado se muestra en la plantilla <code>index.html</code>.</p>
+
+        <!-- Botón para abrir el modal -->
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#infoModal3">
+            Más Información
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="infoModal3" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel3"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModalLabel3">Más Información</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h2>Explicación del Código</h2>
+                        <p>El código proporcionado es un módulo de Flask que maneja el cálculo de integrales triples
+                            utilizando SymPy. A continuación, se explica cada sección del código:</p>
+
+                        <h3>Importaciones</h3>
+                        <pre>
+                            <code>
+from flask import Blueprint, request, render_template
+import sympy as sp
+                            </code>
+                        </pre>
+                        <ul>
+                            <li><code>Blueprint</code>: Permite organizar el código de la aplicación Flask en
+                                componentes reutilizables.</li>
+                            <li><code>request</code>: Permite acceder a los datos enviados en una solicitud HTTP.</li>
+                            <li><code>render_template</code>: Renderiza plantillas HTML.</li>
+                            <li><code>sympy</code>: Biblioteca para realizar cálculos simbólicos en Python.</li>
+                        </ul>
+
+                        <h3>Definición del Blueprint</h3>
+                        <pre>
+                            <code>
+integrales_3x3_bp = Blueprint('integrales_3x3', __name__)
+                            </code>
+                        </pre>
+                        <p>Se crea un <code>Blueprint</code> llamado <code>integrales_3x3</code> para manejar las rutas
+                            relacionadas con las integrales triples.</p>
+
+                        <h3>Ruta Principal</h3>
+                        <pre>
+                            <code>
+@integrales_3x3_bp.route('/')
+def index():
+    return render_template('index.html')
+                            </code>
+                        </pre>
+                        <p>Define la ruta principal (<code>/</code>) que renderiza la plantilla <code>index.html</code>.
+                        </p>
+
+                        <h3>Ruta para Calcular Integrales Triples</h3>
+                        <pre>
+                            <code>
+@integrales_3x3_bp.route('/calculate', methods=['POST'])
+def calculate():
+    try:
+        # Recibir los valores del formulario
+        func_str = request.form['func']
+        x_lower = request.form['x_lower']
+        x_upper = request.form['x_upper']
+        y_lower = request.form['y_lower']
+        y_upper = request.form['y_upper']
+        z_lower = request.form['z_lower']
+        z_upper = request.form['z_upper']
+                            </code>
+                        </pre>
+                        <p>Define la ruta <code>/calculate</code> que acepta solicitudes POST. Recibe los valores del
+                            formulario: <code>func</code> (la función a integrar) y los límites de integración
+                            <code>x_lower</code>, <code>x_upper</code>, <code>y_lower</code>, <code>y_upper</code>,
+                            <code>z_lower</code>, <code>z_upper</code>.</p>
+
+                        <pre>
+                            <code>
+        # Definir las variables simbólicas
+        x, y, z = sp.symbols('x y z')
+                            </code>
+                        </pre>
+                        <p>Define las variables simbólicas utilizando SymPy.</p>
+
+                        <pre>
+                            <code>
+        # Convertir la función de cadena a expresión simbólica
+        func = sp.sympify(func_str, locals={'x': x, 'y': y, 'z': z})
+                            </code>
+                        </pre>
+                        <p>Convierte la función de cadena a una expresión simbólica.</p>
+
+                        <pre>
+                            <code>
+        # Convertir los límites de integración a expresiones simbólicas
+        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z})
+        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})
+        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z})
+        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})
+        z_lower = sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z})
+        z_upper = sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z})
+                            </code>
+                        </pre>
+                        <p>Convierte los límites de integración a expresiones simbólicas.</p>
+
+                        <pre>
+                            <code>
+        # Realizar la integración triple paso a paso
+        integral_z = sp.integrate(func, (z, z_lower, z_upper))
+        integral_y = sp.integrate(integral_z, (y, y_lower, y_upper))
+        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+                            </code>
+                        </pre>
+                        <p>Realiza la integración triple paso a paso: primero respecto a <code>z</code>, luego respecto
+                            a <code>y</code> y finalmente respecto a <code>x</code>.</p>
+
+                        <pre>
+                            <code>
+        return render_template('index.html', result=f'Resultado de la integral: {integral_x}')
+                            </code>
+                        </pre>
+                        <p>Renderiza la plantilla <code>index.html</code> con el resultado de la integral.</p>
+
+                        <h3>Manejo de Excepciones</h3>
+                        <pre>
+                            <code>
+    except ValueError as e:
+        return render_template('index.html', result=f"Error en la entrada: {e}")
+    except Exception as e:
+        return render_template('index.html', result=f"Error al calcular la integral: {e}")
+                            </code>
+                        </pre>
+                        <p>Captura y maneja posibles errores:</p>
+                        <ul>
+                            <li><code>ValueError</code>: Error en la entrada del formulario.</li>
+                            <li><code>Exception</code>: Cualquier otro error durante el cálculo de la integral.</li>
+                        </ul>
+
+                        <h3>Resumen</h3>
+                        <p>El código define un módulo de Flask que permite calcular integrales triples de funciones
+                            simbólicas. Recibe la función y los límites de integración desde un formulario, realiza el
+                            cálculo utilizando SymPy y muestra el resultado en una plantilla HTML.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

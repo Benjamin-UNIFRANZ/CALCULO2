@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Formulario de Estudio{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Formulario de Estudio</h1>
+
+<h2>Derivadas Parciales</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Concepto</th>
+            <th>Descripción</th>
+            <th>Ejemplo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Definición</td>
+            <td>La derivada parcial de una función multivariable respecto a una variable es la derivada de la función manteniendo las otras variables constantes.</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Notación</td>
+            <td>\(\frac{\partial f}{\partial x}\), \(f_x\), \(D_x f\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Ejemplo</td>
+            <td>Si \(f(x, y) = 3x^2 + 5y^3\)</td>
+            <td>\(\frac{\partial f}{\partial x} = 6x\), \(\frac{\partial f}{\partial y} = 15y^2\)</td>
+        </tr>
+        <tr>
+            <td>Funciones trigonométricas</td>
+            <td>\(\frac{\partial}{\partial x} \sin(x) = \cos(x)\), \(\frac{\partial}{\partial x} \cos(x) = -\sin(x)\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Funciones exponenciales</td>
+            <td>\(\frac{\partial}{\partial x} e^x = e^x\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Casos especiales</td>
+            <td>Derivadas parciales de funciones implícitas y derivadas de orden superior.</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Integrales Triples</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Concepto</th>
+            <th>Descripción</th>
+            <th>Ejemplo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Definición</td>
+            <td>La integral triple de una función de tres variables se calcula integrando la función respecto a cada variable en un orden específico.</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Notación</td>
+            <td>\(\iiint_V f(x, y, z) \, dV\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Ejemplo</td>
+            <td>\(\iiint_V x y \, dV\) con \(V\) definido por \(1 \leq x \leq 2\), \(0 \leq y \leq x\), \(0 \leq z \leq y + 2z\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Pasos</td>
+            <td>
+                <ol>
+                    <li>Integrar respecto a \(z\)</li>
+                    <li>Integrar respecto a \(y\)</li>
+                    <li>Integrar respecto a \(x\)</li>
+                </ol>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Casos especiales</td>
+            <td>Integrales en coordenadas cilíndricas y esféricas.</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Integrales Dobles</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Concepto</th>
+            <th>Descripción</th>
+            <th>Ejemplo</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Definición</td>
+            <td>La integral doble de una función de dos variables se calcula integrando la función respecto a cada variable en un orden específico.</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Notación</td>
+            <td>\(\iint_R f(x, y) \, dA\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Ejemplo</td>
+            <td>\(\iint_R (6x^2)y - 2x \, dA\) con \(R\) definido por \(1 \leq x \leq 4\), \(0 \leq y \leq 2\)</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Pasos</td>
+            <td>
+                <ol>
+                    <li>Integrar respecto a \(y\)</li>
+                    <li>Integrar respecto a \(x\)</li>
+                </ol>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>Casos especiales</td>
+            <td>Integrales en coordenadas polares.</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}
