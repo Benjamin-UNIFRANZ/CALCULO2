@@ -7,36 +7,38 @@
 <form id="integralForm" method="POST" action="/calculate">
     <div class="form-group">
         <label for="func">Función a integrar:</label>
-        <input type="text" class="form-control" id="func" name="func" value="x*y" required>
+        <input type="text" class="form-control" id="func" name="func" value="x-y+2*z" required>
     </div>
+
     <div class="form-group">
         <label for="integral">Integral:</label>
         <div class="d-flex align-items-center">
             <div class="text-center">
-                <input type="text" class="form-control mb-2" id="x_upper" name="x_upper" value="3" required>
+                <input type="text" class="form-control mb-2" id="x_upper" name="x_upper" value="2" required>
                 <span style="font-size: 2em;">∫</span>
-                <input type="text" class="form-control mt-2" id="x_lower" name="x_lower" value="2" required>
+                <input type="text" class="form-control mt-2" id="x_lower" name="x_lower" value="0" required>
             </div>
             <div class="text-center mx-3">
-                <input type="text" class="form-control mb-2" id="y_upper" name="y_upper" value="2*x" required>
+                <input type="text" class="form-control mb-2" id="y_upper" name="y_upper" value="2-y" required>
                 <span style="font-size: 2em;">∫</span>
                 <input type="text" class="form-control mt-2" id="y_lower" name="y_lower" value="0" required>
             </div>
             <div class="text-center">
-                <input type="text" class="form-control mb-2" id="z_upper" name="z_upper" value="x^2+y^2+2" required>
+                <input type="text" class="form-control mb-2" id="z_upper" name="z_upper" value="x+y" required>
                 <span style="font-size: 2em;">∫</span>
-                <input type="text" class="form-control mt-2" id="z_lower" name="z_lower" value="1" required>
+                <input type="text" class="form-control mt-2" id="z_lower" name="z_lower" value="0" required>
             </div>
-            <input type="text" class="form-control ml-3" id="differentials" name="differentials" value="dzdydx" required>
+            <input type="text" class="form-control ml-3" id="differentials" name="differentials" value="dzdxdy" required>
         </div>
     </div>
+
     <button type="submit" class="btn btn-primary">Calcular Integral</button>
 </form>
-<div class="mt-4">
+<div class="mt-4 mb-5 pb-5">
     <h2>Resultado:</h2>
-    <p id="result">{{ result }}</p>
+    <p id="result"> Resultado de la integral: {{ result }}</p>
     <h3>Procedimiento:</h3>
-    <div id="solution-steps-target" class="">
+    <div id="solution-steps-target" class="overflow-auto" style="max-height: 400px;">
         <div id="steps-container">
             <section id="multipleSolutions">
                 <div class="solution_div">
@@ -60,23 +62,56 @@
     </div>
 </div>
 
-
-<footer class="card-footer bg-dark text-white py-2 fixed-bottom">
+<footer class="card-footer bg-dark text-white py-0 d-none d-md-block mt-5" style="height: 50px;">
     <div class="row align-items-center justify-content-center">
         <div class="col-md-6 text-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
                 <path d="M13.468 12.37C12.758 11.226 11.383 10.5 8 10.5s-4.758.726-5.468 1.87A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63zM8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
             </svg>
-            <div>Benjamin Rodriguez Ortiz</div>
+            <div style="font-size: 0.6rem;">Benjamin Rodriguez Ortiz</div>
         </div>
         <div class="col-md-6 text-center">
-            <div class="mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+            <div class="mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
                     <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383l-4.803 2.882L15 11.383V5.383zM1 5.383v6l4.803-2.882L1 5.383zM14.803 12H1.197l4.803-2.882L14.803 12z"/>
                 </svg>
             </div>
-            <div>benjamin12062006@gmail.com</div>
+            <div style="font-size: 0.6rem;">benjamin12062006@gmail.com</div>
         </div>
     </div>
 </footer>
+
+<!-- Botón y modal para pantallas pequeñas -->
+<button type="button" class="btn btn-dark d-block d-md-none mt-5 m-3" data-toggle="modal" data-target="#infoModal">
+    Responsable
+</button>
+
+<div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoModalLabel">Información</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                        <path d="M13.468 12.37C12.758 11.226 11.383 10.5 8 10.5s-4.758.726-5.468 1.87A6.987 6.987 0 0 0 8 15a6.987 6.987 0 0 0 5.468-2.63zM8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 1a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/>
+                    </svg>
+                    <div style="font-size: 0.8rem;">Benjamin Rodriguez Ortiz</div>
+                </div>
+                <div class="text-center mt-3">
+                    <div class="mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16">
+                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383l-4.803 2.882L15 11.383V5.383zM1 5.383v6l4.803-2.882L1 5.383zM14.803 12H1.197l4.803-2.882L14.803 12z"/>
+                        </svg>
+                    </div>
+                    <div style="font-size: 0.8rem;">benjamin12062006@gmail.com</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

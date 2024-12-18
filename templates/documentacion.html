@@ -4,9 +4,13 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center">
-        <h1 class="text-center text-dark">Documentación</h1>
-        <img src="{{ url_for('static', filename='img/imagen_200x250.png') }}" alt="Imagen" class="circle-img img-fluid">
+    <div class="d-flex justify-content-between align-items-center row">
+        <div class="col-12 col-md-3 mb-1">
+            <h1 class="text-center text-dark h6 h-md-1 ">Documentación</h1>
+        </div>
+        <div class="col-12 col-md-9 p-1 text-center">
+            <img src="{{ url_for('static', filename='img/imagen_200x250.png') }}" alt="Imagen" class="circle-img img-fluid ">
+        </div>
     </div>
 </div>
 
@@ -215,6 +219,7 @@ def calculate():
         x_upper = request.form['x_upper']
         y_lower = request.form['y_lower']
         y_upper = request.form['y_upper']
+        diffs = request.form['differentials']  # Obtener el orden de los diferenciales
 
         # Definir las variables simbólicas
         x, y = sp.symbols('x y')
@@ -222,17 +227,51 @@ def calculate():
         # Convertir la función de cadena a expresión simbólica
         func = sp.sympify(func_str, locals={'x': x, 'y': y})
 
-        # Convertir los límites de integración a expresiones simbólicas
-        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y})
-        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y})
-        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y})
-        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y})
+        # Crear un diccionario para los límites de integración
+        limits_dict = {
+            'x': (sp.sympify(x_lower, locals={'x': x, 'y': y}), sp.sympify(x_upper, locals={'x': x, 'y': y})),
+            'y': (sp.sympify(y_lower, locals={'x': x, 'y': y}), sp.sympify(y_upper, locals={'x': x, 'y': y}))
+        }
 
-        # Realizar la integración doble paso a paso
-        integral_y = sp.integrate(func, (y, y_lower, y_upper))
-        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+        # Obtener el orden de integración de derecha a izquierda
+        orden_integracion = ['y', 'x']
 
-        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {integral_x}')
+        # Obtener el orden de eliminación de variables según los diferenciales ingresados
+        orden_eliminacion = [var for var in diffs.replace('d', '')]
+
+        # Lista para almacenar los pasos
+        steps = []
+
+        # Integración paso a paso
+        integral = func
+        for idx, var in enumerate(orden_integracion):
+            # Obtener la variable a eliminar según el orden de eliminación
+            var_eliminar = orden_eliminacion[idx]
+            # Obtener los límites correctos según el orden de integración
+            lim_inf, lim_sup = limits_dict[var]
+
+            # Guardar la expresión antes de integrar para mostrar en los pasos
+            expr_before = integral
+
+            # Realizar la integración
+            integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+
+            # Expandir y simplificar después de cada integración
+            integral = sp.expand(integral)
+            integral = sp.simplify(integral)
+
+            # Añadir el paso con detalles
+            step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
+            step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
+            steps.append(step)
+
+        # Resultado final con simplificación adicional
+        result = sp.expand(integral)
+        result = sp.simplify(result)
+        result_str = str(result)
+
+        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {result_str}', steps=steps)
+
     except ValueError as e:
         return render_template('integrales_2x2.html', result=f"Error en la entrada: {e}")
     except Exception as e:
@@ -243,7 +282,6 @@ def calculate():
             función <code>calculate</code> recibe los valores del formulario, convierte la función de cadena a una
             expresión simbólica utilizando SymPy, y calcula la integral doble respecto a las variables especificadas. El
             resultado se muestra en la plantilla <code>integrales_2x2.html</code>.</p>
-        <!-- Botón para abrir el modal -->
         <!-- Botón para abrir el modal -->
         <button type="button" class="btn btn-info" data-toggle="modal" data-target="#infoModal2">
             Más Información
@@ -313,12 +351,12 @@ def calculate():
         x_upper = request.form['x_upper']
         y_lower = request.form['y_lower']
         y_upper = request.form['y_upper']
+        diffs = request.form['differentials']  # Obtener el orden de los diferenciales
                             </code>
                         </pre>
                         <p>Define la ruta <code>/calculate</code> que acepta solicitudes POST. Recibe los valores del
-                            formulario: <code>func</code> (la función a integrar) y los límites de integración
-                            <code>x_lower</code>, <code>x_upper</code>, <code>y_lower</code>, <code>y_upper</code>.
-                        </p>
+                            formulario: <code>func</code> (la función a integrar), los límites de integración
+                            <code>x_lower</code>, <code>x_upper</code>, <code>y_lower</code>, <code>y_upper</code>, y el orden de los diferenciales <code>diffs</code>.</p>
 
                         <pre>
                             <code>
@@ -338,31 +376,87 @@ def calculate():
 
                         <pre>
                             <code>
-        # Convertir los límites de integración a expresiones simbólicas
-        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y})
-        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y})
-        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y})
-        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y})
+        # Crear un diccionario para los límites de integración
+        limits_dict = {
+            'x': (sp.sympify(x_lower, locals={'x': x, 'y': y}), sp.sympify(x_upper, locals={'x': x, 'y': y})),
+            'y': (sp.sympify(y_lower, locals={'x': x, 'y': y}), sp.sympify(y_upper, locals={'x': x, 'y': y}))
+        }
                             </code>
                         </pre>
-                        <p>Convierte los límites de integración a expresiones simbólicas.</p>
+                        <p>Convierte los límites de integración a expresiones simbólicas y los almacena en un diccionario.</p>
 
                         <pre>
                             <code>
-        # Realizar la integración doble paso a paso
-        integral_y = sp.integrate(func, (y, y_lower, y_upper))
-        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+        # Obtener el orden de integración de derecha a izquierda
+        orden_integracion = ['y', 'x']
                             </code>
                         </pre>
-                        <p>Realiza la integración doble paso a paso: primero respecto a <code>y</code> y luego respecto
-                            a <code>x</code>.</p>
+                        <p>Define el orden de integración de derecha a izquierda.</p>
 
                         <pre>
                             <code>
-        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {integral_x}')
+        # Obtener el orden de eliminación de variables según los diferenciales ingresados
+        orden_eliminacion = [var for var in diffs.replace('d', '')]
                             </code>
                         </pre>
-                        <p>Renderiza la plantilla <code>integrales_2x2.html</code> con el resultado de la integral.</p>
+                        <p>Obtiene el orden de eliminación de variables según los diferenciales ingresados.</p>
+
+                        <h3>Lista para Almacenar los Pasos</h3>
+                        <pre>
+                            <code>
+        steps = []
+                            </code>
+                        </pre>
+                        <p>Se crea una lista vacía <code>steps</code> para almacenar los pasos de la integración, que se mostrarán al usuario.</p>
+
+                        <h3>Integración Paso a Paso</h3>
+                        <pre>
+                            <code>
+        integral = func
+        for idx, var in enumerate(orden_integracion):
+            # Obtener la variable a eliminar según el orden de eliminación
+            var_eliminar = orden_eliminacion[idx]
+            # Obtener los límites correctos según el orden de integración
+            lim_inf, lim_sup = limits_dict[var]
+
+            # Guardar la expresión antes de integrar para mostrar en los pasos
+            expr_before = integral
+
+            # Realizar la integración
+            integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+
+            # Expandir y simplificar después de cada integración
+            integral = sp.expand(integral)
+            integral = sp.simplify(integral)
+
+            # Añadir el paso con detalles
+            step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
+            step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
+            steps.append(step)
+                            </code>
+                        </pre>
+                        <p>La integración se realiza paso a paso siguiendo el orden de integración de derecha a izquierda. En cada paso:</p>
+                        <ul>
+                            <li>Se obtiene la variable a eliminar según el orden de eliminación.</li>
+                            <li>Se obtienen los límites de integración correspondientes.</li>
+                            <li>Se guarda la expresión antes de integrar para mostrarla en los pasos.</li>
+                            <li>Se realiza la integración utilizando SymPy.</li>
+                            <li>Se expande y simplifica la expresión después de cada integración.</li>
+                            <li>Se añade el paso con detalles a la lista <code>steps</code>.</li>
+                        </ul>
+
+                        <h3>Resultado Final</h3>
+                        <pre>
+                            <code>
+        # Resultado final con simplificación adicional
+        result = sp.expand(integral)
+        result = sp.simplify(result)
+        result_str = str(result)
+
+        return render_template('integrales_2x2.html', result=f'Resultado de la integral: {result_str}', steps=steps)
+                            </code>
+                        </pre>
+                        <p>Después de completar todos los pasos de integración, se expande y simplifica la expresión final. El resultado se convierte a una cadena de texto y se renderiza en la plantilla <code>integrales_2x2.html</code> junto con los pasos de la integración.</p>
 
                         <h3>Manejo de Excepciones</h3>
                         <pre>
@@ -422,6 +516,7 @@ def calculate():
         y_upper = request.form['y_upper']
         z_lower = request.form['z_lower']
         z_upper = request.form['z_upper']
+        diffs = request.form['differentials']  # Obtener el orden de los diferenciales
 
         # Definir las variables simbólicas
         x, y, z = sp.symbols('x y z')
@@ -429,20 +524,52 @@ def calculate():
         # Convertir la función de cadena a expresión simbólica
         func = sp.sympify(func_str, locals={'x': x, 'y': y, 'z': z})
 
-        # Convertir los límites de integración a expresiones simbólicas
-        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z})
-        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})
-        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z})
-        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})
-        z_lower = sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z})
-        z_upper = sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z})
+        # Crear un diccionario para los límites de integración
+        limits_dict = {
+            'x': (sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})),
+            'y': (sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})),
+            'z': (sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z}))
+        }
 
-        # Realizar la integración triple paso a paso
-        integral_z = sp.integrate(func, (z, z_lower, z_upper))
-        integral_y = sp.integrate(integral_z, (y, y_lower, y_upper))
-        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+        # Obtener el orden de integración de derecha a izquierda
+        orden_integracion = ['z', 'y', 'x']
 
-        return render_template('index.html', result=f'Resultado de la integral: {integral_x}')
+        # Obtener el orden de eliminación de variables según los diferenciales ingresados
+        orden_eliminacion = [var for var in diffs.replace('d', '')]
+
+        # Lista para almacenar los pasos
+        steps = []
+
+        # Integración paso a paso
+        integral = func
+        for idx, var in enumerate(orden_integracion):
+            # Obtener la variable a eliminar según el orden de eliminación
+            var_eliminar = orden_eliminacion[idx]
+            # Obtener los límites correctos según el orden de integración
+            lim_inf, lim_sup = limits_dict[var]
+
+            # Guardar la expresión antes de integrar para mostrar en los pasos
+            expr_before = integral
+
+            # Realizar la integración
+            integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+
+            # Expandir y simplificar después de cada integración
+            integral = sp.expand(integral)
+            integral = sp.simplify(integral)
+
+            # Añadir el paso con detalles
+            step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
+            step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
+            steps.append(step)
+
+        # Resultado final con simplificación adicional
+        result = sp.expand(integral)
+        result = sp.simplify(result)
+        result_str = str(result)
+
+        return render_template('index.html', result=f'Resultado de la integral: {result_str}', steps=steps)
+
     except ValueError as e:
         return render_template('index.html', result=f"Error en la entrada: {e}")
     except Exception as e:
@@ -524,12 +651,13 @@ def calculate():
         y_upper = request.form['y_upper']
         z_lower = request.form['z_lower']
         z_upper = request.form['z_upper']
+        diffs = request.form['differentials']  # Obtener el orden de los diferenciales
                             </code>
                         </pre>
                         <p>Define la ruta <code>/calculate</code> que acepta solicitudes POST. Recibe los valores del
                             formulario: <code>func</code> (la función a integrar) y los límites de integración
                             <code>x_lower</code>, <code>x_upper</code>, <code>y_lower</code>, <code>y_upper</code>,
-                            <code>z_lower</code>, <code>z_upper</code>.</p>
+                            <code>z_lower</code>, <code>z_upper</code>, y el orden de los diferenciales <code>diffs</code>.</p>
 
                         <pre>
                             <code>
@@ -549,34 +677,88 @@ def calculate():
 
                         <pre>
                             <code>
-        # Convertir los límites de integración a expresiones simbólicas
-        x_lower = sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z})
-        x_upper = sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})
-        y_lower = sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z})
-        y_upper = sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})
-        z_lower = sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z})
-        z_upper = sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z})
+        # Crear un diccionario para los límites de integración
+        limits_dict = {
+            'x': (sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})),
+            'y': (sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})),
+            'z': (sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z}))
+        }
                             </code>
                         </pre>
-                        <p>Convierte los límites de integración a expresiones simbólicas.</p>
+                        <p>Convierte los límites de integración a expresiones simbólicas y los almacena en un diccionario.</p>
 
                         <pre>
                             <code>
-        # Realizar la integración triple paso a paso
-        integral_z = sp.integrate(func, (z, z_lower, z_upper))
-        integral_y = sp.integrate(integral_z, (y, y_lower, y_upper))
-        integral_x = sp.integrate(integral_y, (x, x_lower, x_upper))
+        # Obtener el orden de integración de derecha a izquierda
+        orden_integracion = ['z', 'y', 'x']
                             </code>
                         </pre>
-                        <p>Realiza la integración triple paso a paso: primero respecto a <code>z</code>, luego respecto
-                            a <code>y</code> y finalmente respecto a <code>x</code>.</p>
+                        <p>Define el orden de integración de derecha a izquierda.</p>
 
                         <pre>
                             <code>
-        return render_template('index.html', result=f'Resultado de la integral: {integral_x}')
+        # Obtener el orden de eliminación de variables según los diferenciales ingresados
+        orden_eliminacion = [var for var in diffs.replace('d', '')]
                             </code>
                         </pre>
-                        <p>Renderiza la plantilla <code>index.html</code> con el resultado de la integral.</p>
+                        <p>Obtiene el orden de eliminación de variables según los diferenciales ingresados.</p>
+
+                        <h3>Lista para Almacenar los Pasos</h3>
+                        <pre>
+                            <code>
+        steps = []
+                            </code>
+                        </pre>
+                        <p>Se crea una lista vacía <code>steps</code> para almacenar los pasos de la integración, que se mostrarán al usuario.</p>
+
+                        <h3>Integración Paso a Paso</h3>
+                        <pre>
+                            <code>
+        integral = func
+        for idx, var in enumerate(orden_integracion):
+            # Obtener la variable a eliminar según el orden de eliminación
+            var_eliminar = orden_eliminacion[idx]
+            # Obtener los límites correctos según el orden de integración
+            lim_inf, lim_sup = limits_dict[var]
+
+            # Guardar la expresión antes de integrar para mostrar en los pasos
+            expr_before = integral
+
+            # Realizar la integración
+            integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+
+            # Expandir y simplificar después de cada integración
+            integral = sp.expand(integral)
+            integral = sp.simplify(integral)
+
+            # Añadir el paso con detalles
+            step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
+            step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
+            steps.append(step)
+                            </code>
+                        </pre>
+                        <p>La integración se realiza paso a paso siguiendo el orden de integración de derecha a izquierda. En cada paso:</p>
+                        <ul>
+                            <li>Se obtiene la variable a eliminar según el orden de eliminación.</li>
+                            <li>Se obtienen los límites de integración correspondientes.</li>
+                            <li>Se guarda la expresión antes de integrar para mostrarla en los pasos.</li>
+                            <li>Se realiza la integración utilizando SymPy.</li>
+                            <li>Se expande y simplifica la expresión después de cada integración.</li>
+                            <li>Se añade el paso con detalles a la lista <code>steps</code>.</li>
+                        </ul>
+
+                        <h3>Resultado Final</h3>
+                        <pre>
+                            <code>
+        # Resultado final con simplificación adicional
+        result = sp.expand(integral)
+        result = sp.simplify(result)
+        result_str = str(result)
+
+        return render_template('index.html', result=f'Resultado de la integral: {result_str}', steps=steps)
+                            </code>
+                        </pre>
+                        <p>Después de completar todos los pasos de integración, se expande y simplifica la expresión final. El resultado se convierte a una cadena de texto y se renderiza en la plantilla <code>index.html</code> junto con los pasos de la integración.</p>
 
                         <h3>Manejo de Excepciones</h3>
                         <pre>
