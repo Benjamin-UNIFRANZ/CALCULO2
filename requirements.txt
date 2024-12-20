@@ -1,11 +1,17 @@
 # Flask y web
-Flask==2.0.1
-Jinja2==3.0.1
-Werkzeug==2.0.1
+blinker==1.9.0
+click==8.1.7
+Flask==3.1.0
+itsdangerous==2.2.0
+Jinja2==3.1.4
+MarkupSafe==3.0.2
+Werkzeug==3.1.3
 
 # Matemáticas y cálculo
-sympy==1.8
-numpy==1.21.0
+mpmath==1.3.0
+sympy==1.13.3
+numpy==2.2.0
 
 # Visualización 3D
-plotly==5.1.0
+plotly==5.24.1
+tenacity==9.0.0
