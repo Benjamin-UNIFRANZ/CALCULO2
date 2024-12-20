@@ -32,7 +32,8 @@
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Calcular Integral</button>
+    <button type="submit" class="btn btn-primary" name="action" value="calculate">Calcular Integral</button>
+    <button type="submit" class="btn btn-secondary" name="action" value="plot">Crear Gráfica 3D</button>
 </form>
 <div class="mt-4 mb-5 pb-5">
     <h2>Resultado:</h2>
@@ -60,6 +61,15 @@
             </section>
         </div>
     </div>
+    <h3>Gráfica 3D:</h3>
+    <div class="text-center">
+        {% if plot_html %}
+            {{ plot_html|safe }}
+        {% else %}
+            <p>Error al generar la gráfica</p>
+        {% endif %}
+    </div>
+
 </div>
 
 <footer class="card-footer bg-dark text-white py-0 d-none d-md-block mt-5" style="height: 50px;">

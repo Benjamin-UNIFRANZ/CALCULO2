@@ -1,5 +1,12 @@
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, url_for
 import sympy as sp
+import numpy as np
+import plotly.graph_objects as go
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 integrales_3x3_bp = Blueprint('integrales_3x3', __name__)
 
@@ -7,73 +14,147 @@ integrales_3x3_bp = Blueprint('integrales_3x3', __name__)
 def index():
     return render_template('index.html')
 
+def create_3d_plot(func, x, y, z, x_lower, x_upper, y_lower, y_upper):
+    """Crear gráfica 3D interactiva"""
+    try:
+        # Los límites ya son valores numéricos
+        x_min = x_lower
+        x_max = x_upper
+        y_min = y_lower
+        y_max = y_upper
+
+        logger.debug(f"x_min: {x_min}, x_max: {x_max}, y_min: {y_min}, y_max: {y_max}")
+
+        # Generar puntos
+        x_vals = np.linspace(x_min, x_max, 50)
+        y_vals = np.linspace(y_min, y_max, 50)
+        X, Y = np.meshgrid(x_vals, y_vals)
+        Z = np.zeros_like(X)
+        
+        # Evaluar función
+        for i in range(len(x_vals)):
+            for j in range(len(y_vals)):
+                try:
+                    subs_dict = {x: X[i,j], y: Y[i,j], z: 0}
+                    Z[i,j] = float(func.subs(subs_dict).evalf())
+                except Exception as e:
+                    logger.error(f"Error al evaluar la función en ({X[i,j]}, {Y[i,j]}): {e}")
+                    Z[i,j] = np.nan
+
+        # Crear figura
+        fig = go.Figure(data=[go.Surface(z=Z, x=X, y=Y)])
+        fig.update_layout(
+            title=f'Función: {func}',
+            scene = dict(
+                xaxis_title='X',
+                yaxis_title='Y',
+                zaxis_title='Z'
+            ),
+            width=800,
+            height=600
+        )
+        
+        # Devolver gráfica como HTML embebido
+        plot_html = fig.to_html(full_html=False)
+        logger.debug("Gráfica creada")
+        return plot_html
+    except Exception as e:
+        logger.error(f"Error en create_3d_plot: {e}")
+        return None
+
 @integrales_3x3_bp.route('/calculate', methods=['POST'])
 def calculate():
     try:
-        # Recibir los valores del formulario
+        # Recibir valores del formulario
         func_str = request.form['func']
-        x_lower = request.form['x_lower']
-        x_upper = request.form['x_upper']
-        y_lower = request.form['y_lower']
-        y_upper = request.form['y_upper']
-        z_lower = request.form['z_lower']
-        z_upper = request.form['z_upper']
-        diffs = request.form['differentials']  # Obtener el orden de los diferenciales
+        x_lower_str = request.form['x_lower']
+        x_upper_str = request.form['x_upper']
+        y_lower_str = request.form['y_lower']
+        y_upper_str = request.form['y_upper']
+        z_lower_str = request.form['z_lower']
+        z_upper_str = request.form['z_upper']
+        diffs = request.form['differentials']
+        action = request.form['action']
 
-        # Definir las variables simbólicas
+        logger.debug(f"Datos recibidos: func={func_str}, x_lower={x_lower_str}, x_upper={x_upper_str}, y_lower={y_lower_str}, y_upper={y_upper_str}, z_lower={z_lower_str}, z_upper={z_upper_str}, diffs={diffs}, action={action}")
+
+        # Variables simbólicas
         x, y, z = sp.symbols('x y z')
 
-        # Convertir la función de cadena a expresión simbólica
+        # Convertir función
         func = sp.sympify(func_str, locals={'x': x, 'y': y, 'z': z})
 
-        # Crear un diccionario para los límites de integración
+        # Convertir límites de integración a expresiones simbólicas
+        x_lower = sp.sympify(x_lower_str, locals={'x': x, 'y': y, 'z': z})
+        x_upper = sp.sympify(x_upper_str, locals={'x': x, 'y': y, 'z': z})
+        y_lower = sp.sympify(y_lower_str, locals={'x': x, 'y': y, 'z': z})
+        y_upper = sp.sympify(y_upper_str, locals={'x': x, 'y': y, 'z': z})
+        z_lower = sp.sympify(z_lower_str, locals={'x': x, 'y': y, 'z': z})
+        z_upper = sp.sympify(z_upper_str, locals={'x': x, 'y': y, 'z': z})
+
+        # Definir límites de integración
         limits_dict = {
-            'x': (sp.sympify(x_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(x_upper, locals={'x': x, 'y': y, 'z': z})),
-            'y': (sp.sympify(y_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(y_upper, locals={'x': x, 'y': y, 'z': z})),
-            'z': (sp.sympify(z_lower, locals={'x': x, 'y': y, 'z': z}), sp.sympify(z_upper, locals={'x': x, 'y': y, 'z': z}))
+            'x': (x_lower, x_upper),
+            'y': (y_lower, y_upper),
+            'z': (z_lower, z_upper)
         }
 
-        # Obtener el orden de integración de derecha a izquierda
-        orden_integracion = ['z', 'y', 'x']
+        if action == 'calculate':
+            # Orden de integración
+            orden_integracion = ['z', 'y', 'x']
+            orden_eliminacion = [var for var in diffs.replace('d', '')]
 
-        # Obtener el orden de eliminación de variables según los diferenciales ingresados
-        orden_eliminacion = [var for var in diffs.replace('d', '')]
+            # Lista para pasos
+            steps = []
+            
+            # Integración paso a paso
+            integral = func
+            for idx, var in enumerate(orden_integracion):
+                var_eliminar = orden_eliminacion[idx]
+                lim_inf, lim_sup = limits_dict[var]
+                
+                expr_before = integral
+                integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+                integral = sp.expand(integral)
+                integral = sp.simplify(integral)
+                
+                step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
+                step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
+                step += rf"\(\int_{{{sp.latex(lim_inf)}}}^{{{sp.latex(lim_sup)}}} {sp.latex(expr_before)} \, d{var_eliminar} = {sp.latex(integral)}\)"
+                steps.append(step)
 
-        # Lista para almacenar los pasos
-        steps = []
+            # Resultado final
+            result = sp.expand(integral)
+            result = sp.simplify(result)
+            result_str = str(result)
+            
+            return render_template('index.html', 
+                                 result=f'Resultado: {result_str}', 
+                                 steps=steps)
 
-        # Integración paso a paso
-        integral = func
-        for idx, var in enumerate(orden_integracion):
-            # Obtener la variable a eliminar según el orden de eliminación
-            var_eliminar = orden_eliminacion[idx]
-            # Obtener los límites correctos según el orden de integración
-            lim_inf, lim_sup = limits_dict[var]
+        elif action == 'plot':
+            # Asegurarse de que los límites sean numéricos
+            x_lower_num = float(x_lower.evalf())
+            x_upper_num = float(x_upper.evalf())
+            y_lower_num = float(y_lower.subs(y, 0).evalf())
+            y_upper_num = float(y_upper.subs(y, 0).evalf())
 
-            # Guardar la expresión antes de integrar para mostrar en los pasos
-            expr_before = integral
+            # Crear gráfica 3D
+            plot_html = create_3d_plot(
+                func, x, y, z,
+                x_lower_num, x_upper_num,
+                y_lower_num, y_upper_num
+            )
 
-            # Realizar la integración
-            integral = sp.integrate(integral, (sp.symbols(var_eliminar), lim_inf, lim_sup))
+            if plot_html:
+                logger.debug("Gráfica creada")
+            else:
+                logger.error("No se pudo crear la gráfica")
 
-            # Expandir y simplificar después de cada integración
-            integral = sp.expand(integral)
-            integral = sp.simplify(integral)
+            return render_template('index.html', 
+                                 plot_html=plot_html)
 
-            # Añadir el paso con detalles
-            step = f"**Paso {idx + 1}: Integrar respecto a {var_eliminar}**\n"
-            step += f"Expresión antes de integrar: {sp.latex(expr_before)}\n"
-            step += rf"\(\int_{{{sp.latex(lim_inf)}}}^{{{sp.latex(lim_sup)}}} {sp.latex(expr_before)} \, d{var_eliminar} = {sp.latex(integral)}\)"
-            steps.append(step)
-
-        # Resultado final con simplificación adicional
-        result = sp.expand(integral)
-        result = sp.simplify(result)
-        result_str = str(result)
-
-        return render_template('index.html', result=f'Resultado de la integral: {result_str}', steps=steps)
-
-    except ValueError as e:
-        return render_template('index.html', result=f"Error en la entrada: {e}")
     except Exception as e:
-        return render_template('index.html', result=f"Error al calcular la integral: {e}")
+        logger.error(f"Error en calculate: {e}")
+        return render_template('index.html', 
+                             result=f"Error: {str(e)}")
